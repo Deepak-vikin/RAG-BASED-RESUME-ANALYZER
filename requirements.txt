@@ -1,3 +1,4 @@
 streamlit
 langchain_community
 langchain
+langchain.text_splitters 
