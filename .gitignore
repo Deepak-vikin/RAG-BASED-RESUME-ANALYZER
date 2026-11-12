@@ -1,20 +1,36 @@
 # Python cache
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
+*.so
 
 # Virtual environment
 venv/
 env/
+.venv/
+ENV/
 
-# Streamlit cache
-.streamlit/
+# Environment Variables & Secrets
+.env
+.env.local
+.env.*.local
+*.env
 
-# Uploaded resumes
+# Runtime Application Data & Vector Storage
+data/
+uploads/
+vectorstores/
+*.faiss
+*.pkl
+
+# Uploaded resumes / test files
 resumes/
 
-# Vector DB (if saved)
-faiss_index/
+# Deprecated Streamlit cache
+.streamlit/
 
 # OS files
 .DS_Store
 Thumbs.db
+*.swp
+*.bak

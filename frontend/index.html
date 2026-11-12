@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DocuQuery AI | Enterprise Document Intelligence & RAG</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236366f1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z'/><polyline points='14 2 14 8 20 8'/><path d='M8 13h8'/><path d='M8 17h8'/><path d='M10 9h1'/></svg>" />
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            background: '#080b12',
+            surface: '#0e1526',
+            'surface-card': '#10182b',
+            'surface-border': '#1e293b',
+            primary: {
+              400: '#818cf8',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Marked.js for Markdown Rendering -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+
+<body class="bg-[#080b12] text-slate-100 min-h-screen flex flex-col relative selection:bg-indigo-500/30 selection:text-indigo-200">
+  <!-- Animated Ambient Glows & Grid -->
+  <div class="ambient-glow glow-1"></div>
+  <div class="ambient-glow glow-2"></div>
+  <div class="ambient-glow glow-3"></div>
+  <div class="grid-overlay"></div>
+
+  <!-- Header / Navigation Bar -->
+  <header class="sticky top-0 z-40 border-b border-white/10 glass-panel px-4 lg:px-6 py-3.5 flex items-center justify-between">
+    <!-- Brand -->
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/25">
+        <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <h1 class="text-base font-bold tracking-tight text-white">DocuQuery<span class="text-indigo-400">.AI</span></h1>
+          <span class="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">Production RAG</span>
+        </div>
+        <p class="text-[11px] text-slate-400 hidden sm:block">OpenRouter LLMs • FAISS Vector Store • Sentence Transformers</p>
+      </div>
+    </div>
+
+    <!-- Controls & Status -->
+    <div class="flex items-center gap-3">
+      <!-- Backend Status Badge -->
+      <div class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-900/60 border border-white/5 text-xs text-slate-300">
+        <span id="health-indicator" class="w-2.5 h-2.5 rounded-full bg-slate-500"></span>
+        <span id="health-text" class="font-medium">Connecting...</span>
+      </div>
+
+      <!-- Model Selector -->
+      <div class="flex items-center gap-2">
+        <label for="model-select" class="text-xs text-slate-400 hidden lg:block">Model:</label>
+        <select 
+          id="model-select" 
+          class="glass-input text-xs font-mono rounded-lg px-2.5 py-1.5 text-slate-200 bg-slate-900/80 cursor-pointer focus:ring-1 focus:ring-indigo-500"
+        >
+          <option value="meta-llama/llama-3.3-70b-instruct">Llama 3.3 70B</option>
+          <option value="anthropic/claude-3.5-sonnet">Claude 3.5 Sonnet</option>
+          <option value="google/gemini-2.0-flash-001">Gemini 2.0 Flash</option>
+          <option value="openai/gpt-4o-mini">GPT-4o Mini</option>
+        </select>
+      </div>
+
+      <!-- Settings / API Config Button -->
+      <button 
+        type="button" 
+        id="api-url-btn" 
+        title="Configure Backend API URL" 
+        class="p-2 rounded-lg bg-slate-900/60 border border-white/5 text-slate-400 hover:text-white hover:bg-slate-800/60 transition-colors"
+      >
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+      </button>
+
+      <!-- Mobile Sidebar Toggle -->
+      <button 
+        type="button" 
+        id="mobile-sidebar-toggle" 
+        class="lg:hidden p-2 rounded-lg bg-slate-900/60 border border-white/5 text-slate-400 hover:text-white"
+      >
+        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="flex-1 flex overflow-hidden relative z-10">
+    <!-- Left Panel: Document Management & Upload -->
+    <aside 
+      id="sidebar" 
+      class="w-full lg:w-80 xl:w-96 border-r border-white/10 glass-panel flex flex-col shrink-0 absolute lg:relative inset-y-0 left-0 z-30 transition-transform duration-300 bg-[#080b12]/95 lg:bg-transparent"
+    >
+      <!-- Upload Zone Section -->
+      <div class="p-4 border-b border-white/10">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Document Ingestion</h2>
+          <span class="text-[11px] text-slate-500 font-mono">Max 30MB</span>
+        </div>
+
+        <!-- Drag & Drop Zone -->
+        <div 
+          id="drop-zone" 
+          class="border-2 border-dashed border-white/15 hover:border-indigo-500/50 rounded-xl p-5 text-center cursor-pointer transition-all bg-slate-900/40 hover:bg-slate-900/60 group"
+        >
+          <input type="file" id="file-input" class="hidden" multiple accept=".pdf,.txt,.md" />
+          <div class="w-10 h-10 rounded-full bg-indigo-500/10 text-indigo-400 flex items-center justify-center mx-auto mb-2 group-hover:scale-110 transition-transform">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+            </svg>
+          </div>
+          <p class="text-sm font-medium text-slate-200">Drag & drop documents here</p>
+          <p class="text-xs text-slate-500 mt-1">or <span class="text-indigo-400 group-hover:underline">browse files</span></p>
+          <div class="flex justify-center gap-1.5 mt-3">
+            <span class="px-2 py-0.5 rounded text-[10px] bg-white/5 border border-white/5 text-slate-400">PDF</span>
+            <span class="px-2 py-0.5 rounded text-[10px] bg-white/5 border border-white/5 text-slate-400">TXT</span>
+            <span class="px-2 py-0.5 rounded text-[10px] bg-white/5 border border-white/5 text-slate-400">MD</span>
+          </div>
+        </div>
+
+        <!-- Upload Progress Indicator -->
+        <div id="upload-progress" class="mt-3 hidden">
+          <div class="flex items-center justify-between text-xs mb-1">
+            <span id="progress-text" class="text-indigo-300">Processing document...</span>
+            <span class="text-slate-400">Indexing</span>
+          </div>
+          <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+            <div id="progress-bar" class="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full transition-all duration-300 w-0"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Document Scope Selection -->
+      <div class="p-3 border-b border-white/10">
+        <button 
+          type="button" 
+          id="all-docs-btn" 
+          class="w-full flex items-center justify-between p-3 rounded-xl border border-indigo-500/40 bg-indigo-600/15 text-indigo-200 transition-all shadow-[0_0_15px_rgba(99,102,241,0.15)]"
+        >
+          <div class="flex items-center gap-2.5">
+            <div class="p-2 rounded-lg bg-indigo-500/20 text-indigo-400">
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+              </svg>
+            </div>
+            <div class="text-left">
+              <span class="text-sm font-semibold block">All Documents</span>
+              <span class="text-[11px] text-slate-400">Unified multi-document RAG</span>
+            </div>
+          </div>
+          <span id="doc-count-badge" class="px-2 py-0.5 rounded-full text-xs bg-indigo-500/20 text-indigo-300 font-mono">0</span>
+        </button>
+      </div>
+
+      <!-- Scrollable Document Cards List -->
+      <div class="flex-1 overflow-y-auto p-3 space-y-2" id="document-list">
+        <!-- Rendered dynamically by app.js -->
+      </div>
+    </aside>
+
+    <!-- Right Panel: Document Analyzer Workspace & AI Chat -->
+    <section class="flex-1 flex flex-col min-w-0 bg-transparent">
+      <!-- Workspace Header -->
+      <div class="px-6 py-3 border-b border-white/10 glass-panel flex items-center justify-between">
+        <div class="min-w-0">
+          <div class="flex items-center gap-2">
+            <h2 id="active-doc-title" class="text-sm font-semibold text-white truncate">All Indexed Documents</h2>
+            <span class="w-1.5 h-1.5 rounded-full bg-indigo-400"></span>
+            <span class="text-xs font-mono text-indigo-400">Grounded Mode</span>
+          </div>
+          <p id="active-doc-subtitle" class="text-xs text-slate-400 truncate mt-0.5">Querying unified vector store across documents</p>
+        </div>
+
+        <button 
+          type="button" 
+          id="clear-chat-btn" 
+          title="Clear current conversation" 
+          class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900/60 border border-white/5 text-xs text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-colors"
+        >
+          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+          </svg>
+          <span class="hidden sm:inline">Clear Chat</span>
+        </button>
+      </div>
+
+      <!-- Chat Messages Scroll Area -->
+      <div id="chat-messages" class="flex-1 overflow-y-auto p-4 lg:p-6 space-y-4">
+        <!-- Empty State -->
+        <div id="empty-state" class="h-full flex flex-col items-center justify-center text-center max-w-lg mx-auto py-12 px-4">
+          <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-indigo-500/20 via-purple-500/20 to-cyan-500/20 border border-white/10 flex items-center justify-center mb-5 shadow-2xl shadow-indigo-500/10">
+            <svg class="w-8 h-8 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold text-white mb-2">Enterprise Document Intelligence</h3>
+          <p class="text-sm text-slate-400 mb-6 leading-relaxed">
+            Upload candidate resumes, technical specifications, or documents. Ask targeted questions and get verified, grounded answers backed by source citations.
+          </p>
+
+          <!-- Starter Prompts Grid -->
+          <div class="w-full grid grid-cols-1 sm:grid-cols-2 gap-2 text-left">
+            <button 
+              type="button" 
+              class="starter-prompt-btn glass-card p-3 rounded-xl text-xs text-slate-300 hover:text-indigo-200 transition-all text-left flex items-start gap-2 group"
+              data-prompt="What are the candidate's core technical skills, programming languages, and tools?"
+            >
+              <span class="text-indigo-400 group-hover:translate-x-0.5 transition-transform mt-0.5">✦</span>
+              <span>What are the candidate's core technical skills and tools?</span>
+            </button>
+
+            <button 
+              type="button" 
+              class="starter-prompt-btn glass-card p-3 rounded-xl text-xs text-slate-300 hover:text-indigo-200 transition-all text-left flex items-start gap-2 group"
+              data-prompt="Summarize the work history, key roles, and major accomplishments."
+            >
+              <span class="text-indigo-400 group-hover:translate-x-0.5 transition-transform mt-0.5">✦</span>
+              <span>Summarize work history and key accomplishments.</span>
+            </button>
+
+            <button 
+              type="button" 
+              class="starter-prompt-btn glass-card p-3 rounded-xl text-xs text-slate-300 hover:text-indigo-200 transition-all text-left flex items-start gap-2 group"
+              data-prompt="What degrees, certifications, or educational background are listed?"
+            >
+              <span class="text-indigo-400 group-hover:translate-x-0.5 transition-transform mt-0.5">✦</span>
+              <span>What degrees, education, or certifications are listed?</span>
+            </button>
+
+            <button 
+              type="button" 
+              class="starter-prompt-btn glass-card p-3 rounded-xl text-xs text-slate-300 hover:text-indigo-200 transition-all text-left flex items-start gap-2 group"
+              data-prompt="Compare the qualifications and experience of the uploaded candidates."
+            >
+              <span class="text-indigo-400 group-hover:translate-x-0.5 transition-transform mt-0.5">✦</span>
+              <span>Compare the qualifications of the uploaded candidates.</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Chat Input Bar -->
+      <div class="p-4 border-t border-white/10 glass-panel">
+        <form id="chat-form" class="max-w-4xl mx-auto relative flex flex-col gap-2">
+          <div class="relative flex items-center glass-input rounded-2xl p-2 shadow-2xl">
+            <textarea 
+              id="chat-input" 
+              rows="1" 
+              placeholder="Ask a question about the uploaded document(s)..." 
+              class="w-full bg-transparent text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none px-3 py-1.5 resize-none max-h-36"
+            ></textarea>
+
+            <button 
+              type="submit" 
+              id="send-btn" 
+              title="Send question" 
+              class="shrink-0 p-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white shadow-lg shadow-indigo-600/30 transition-all disabled:opacity-40"
+            >
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+            </button>
+          </div>
+
+          <div class="flex items-center justify-between px-2 text-[11px] text-slate-500">
+            <span>Press <kbd class="px-1.5 py-0.5 rounded bg-white/5 border border-white/10 font-mono text-[10px]">Enter</kbd> to send, <kbd class="px-1.5 py-0.5 rounded bg-white/5 border border-white/10 font-mono text-[10px]">Shift + Enter</kbd> for new line</span>
+            <span class="hidden sm:inline">Answers grounded strictly in retrieved context.</span>
+          </div>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <!-- Source Excerpt Modal -->
+  <div id="source-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md hidden">
+    <div class="w-full max-w-2xl glass-panel rounded-2xl border border-white/15 p-6 shadow-2xl animate-fadeIn">
+      <div class="flex items-center justify-between pb-3 border-b border-white/10">
+        <div>
+          <h3 id="source-modal-title" class="text-base font-semibold text-white">Document Source</h3>
+          <p id="source-modal-meta" class="text-xs font-mono text-indigo-400 mt-0.5"></p>
+        </div>
+        <button type="button" id="source-modal-close" class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <div class="mt-4">
+        <label class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Indexed Excerpt (Grounding Context):</label>
+        <div id="source-modal-content" class="mt-2 p-4 rounded-xl bg-slate-950/80 border border-white/10 font-mono text-xs text-slate-300 leading-relaxed max-h-96 overflow-y-auto whitespace-pre-wrap"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings / API Configuration Modal -->
+  <div id="settings-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md hidden">
+    <div class="w-full max-w-md glass-panel rounded-2xl border border-white/15 p-6 shadow-2xl animate-fadeIn">
+      <div class="flex items-center justify-between pb-3 border-b border-white/10">
+        <h3 class="text-base font-semibold text-white">Backend API Settings</h3>
+        <button type="button" id="settings-close-btn" class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="mt-4 space-y-4">
+        <div>
+          <label class="text-xs text-slate-300 font-medium block mb-1.5">Backend URL (Render or Local):</label>
+          <input 
+            type="text" 
+            id="settings-api-input" 
+            placeholder="http://127.0.0.1:8000 or https://your-backend.onrender.com" 
+            class="w-full glass-input rounded-xl px-3.5 py-2 text-sm text-white placeholder:text-slate-600"
+          />
+          <p class="text-[11px] text-slate-400 mt-1.5 leading-relaxed">
+            Leave blank when deploying the frontend on the same host, or set to your Render URL: <br/>
+            <code class="text-indigo-300 font-mono">https://YOUR-APP.onrender.com</code>
+          </p>
+        </div>
+
+        <div class="flex justify-end gap-2 pt-2">
+          <button 
+            type="button" 
+            id="settings-save-btn" 
+            class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-lg shadow-indigo-600/30 transition-all"
+          >
+            Save & Connect
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container"></div>
+
+  <!-- Application Scripts -->
+  <script src="js/api.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
