@@ -21,7 +21,13 @@ function getApiBaseUrl() {
     return 'http://127.0.0.1:8000';
   }
 
-  // Default to relative (useful when reverse proxied on Vercel)
+  // Production: use backend URL injected via js/config.js (window.BACKEND_URL)
+  // Set window.BACKEND_URL = 'https://your-render-app.onrender.com' in config.js
+  if (window.BACKEND_URL) return window.BACKEND_URL.replace(/\/$/, '');
+
+  // No backend URL configured — requests will fail on static hosting.
+  // Open Settings (gear icon) in the UI to set the backend URL at runtime.
+  console.warn('[DocuQuery] No backend URL configured. Set window.BACKEND_URL in js/config.js or use the Settings panel.');
   return '';
 }
 

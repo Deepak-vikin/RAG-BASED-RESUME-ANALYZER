@@ -6,22 +6,41 @@ services:
     plan: free
     branch: main
     rootDir: backend
-    buildCommand: pip install --upgrade pip && pip install -r requirements.txt
+    # Install CPU-only PyTorch first (avoids pulling the 2GB GPU build),
+    # then install the rest of the requirements.
+    buildCommand: >-
+      pip install --upgrade pip &&
+      pip install torch --index-url https://download.pytorch.org/whl/cpu &&
+      pip install -r requirements.txt
     startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: PYTHON_VERSION
-        value: 3.11.9
+        value: "3.11.9"
       - key: OPENROUTER_API_KEY
-        sync: false
+        sync: false          # Set manually in Render dashboard — never commit this value
       - key: OPENROUTER_MODEL
-        value: meta-llama/llama-3.3-70b-instruct
+        value: meta-llama/llama-3.3-70b-instruct:free
       - key: FRONTEND_ORIGIN
-        value: https://*.vercel.app
+        # After deploying the Vercel frontend, replace * with your exact Vercel URL:
+        # e.g. https://docuquery-ai.vercel.app
+        # Wildcard (*) is used here as the safe default before the Vercel URL is known.
+        value: "*"
       - key: DATA_DIR
         value: ./data
-    # For Render paid instances with Persistent Disk support:
+      - key: ENVIRONMENT
+        value: production
+      - key: OPENROUTER_SITE_URL
+        value: https://your-app.vercel.app   # Update after Vercel deploy
+      - key: OPENROUTER_APP_NAME
+        value: "DocuQuery AI"
+
+    # NOTE: Render free tier has an EPHEMERAL filesystem.
+    # Uploaded documents and FAISS indexes are lost on every restart/redeploy.
+    # To persist data, upgrade to a paid Render plan and uncomment the disk below:
+    #
     # disk:
     #   name: document-storage
     #   mountPath: /var/data
     #   sizeGB: 5
-
+    #
+    # Then set DATA_DIR=/var/data in envVars above.

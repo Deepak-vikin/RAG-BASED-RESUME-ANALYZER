@@ -6,11 +6,14 @@ from starlette.testclient import TestClient
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.dirname(current_dir)
+backend_dir = os.path.join(project_root, "backend")
+if backend_dir not in sys.path:
+    sys.path.insert(0, backend_dir)
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
-from backend.app.main import app
-from backend.app.config import settings
+from app.main import app
+from app.config import settings
 
 
 class TestRAGChatPipeline(unittest.TestCase):
@@ -36,7 +39,7 @@ class TestRAGChatPipeline(unittest.TestCase):
             "usage": {"prompt_tokens": 120, "completion_tokens": 28}
         }
 
-        with patch("backend.app.services.openrouter_client.openrouter_client.chat_completion", new_callable=AsyncMock) as mock_chat:
+        with patch("app.services.openrouter_client.openrouter_client.chat_completion", new_callable=AsyncMock) as mock_chat:
             mock_chat.return_value = mock_response
 
             chat_res = self.client.post("/api/chat", json={
@@ -68,4 +71,3 @@ class TestRAGChatPipeline(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-

@@ -1,14 +1,14 @@
 import logging
 from typing import List
 from fastapi import APIRouter, UploadFile, File, HTTPException
-from backend.app.schemas.document import (
+from app.schemas.document import (
     DocumentMetadata,
     DocumentListResponse,
     DocumentUploadResponse,
     DocumentDeleteResponse
 )
-from backend.app.services.document_service import document_service
-from backend.app.core.exceptions import DocumentAnalyzerException
+from app.services.document_service import document_service
+from app.core.exceptions import DocumentAnalyzerException
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/documents", tags=["Documents"])

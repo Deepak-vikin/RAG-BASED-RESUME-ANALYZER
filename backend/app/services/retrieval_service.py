@@ -4,10 +4,10 @@ import logging
 from typing import List, Optional, Dict
 from langchain_community.vectorstores import FAISS
 from langchain_core.documents import Document
-from backend.app.config import settings
-from backend.app.services.embedding_service import embedding_service
-from backend.app.schemas.chat import SourceDocument
-from backend.app.core.exceptions import VectorStoreError
+from app.config import settings
+from app.services.embedding_service import embedding_service
+from app.schemas.chat import SourceDocument
+from app.core.exceptions import VectorStoreError
 
 logger = logging.getLogger(__name__)
 

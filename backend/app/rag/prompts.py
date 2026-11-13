@@ -1,6 +1,6 @@
 from typing import List
 from langchain_core.documents import Document
-from backend.app.schemas.chat import ChatMessage
+from app.schemas.chat import ChatMessage
 
 SYSTEM_PROMPT = """You are an expert Document Intelligence Assistant. Your primary goal is to answer the user's questions truthfully, accurately, and concisely based ONLY on the provided document excerpts.
 

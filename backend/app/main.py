@@ -1,14 +1,12 @@
-import os
 import logging
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, FileResponse
-from fastapi.staticfiles import StaticFiles
+from fastapi.responses import JSONResponse
 
-from backend.app.config import settings
-from backend.app.api.routes import health, documents, chat
-from backend.app.core.exceptions import DocumentAnalyzerException
-from backend.app.services.embedding_service import embedding_service
+from app.config import settings
+from app.api.routes import health, documents, chat
+from app.core.exceptions import DocumentAnalyzerException
+from app.services.embedding_service import embedding_service
 
 logging.basicConfig(
     level=logging.INFO,
@@ -25,15 +23,18 @@ app = FastAPI(
 )
 
 # Configure CORS
+# Note: allow_credentials=True cannot be combined with allow_origins=["*"]
+# When FRONTEND_ORIGIN is "*", we set allow_credentials=False
 origins = settings.cors_origins
-logger.info(f"Configured CORS origins: {origins}")
+is_wildcard = "*" in origins
+logger.info(f"Configured CORS origins: {origins}, wildcard={is_wildcard}")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins if "*" not in origins else ["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=["*"] if is_wildcard else origins,
+    allow_credentials=False if is_wildcard else True,
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["Content-Type", "Authorization", "Accept", "X-Requested-With"],
 )
 
 # Include API Routers
@@ -41,20 +42,14 @@ app.include_router(health.router)
 app.include_router(documents.router)
 app.include_router(chat.router)
 
-# Mount Frontend static files if available
-frontend_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "frontend"))
-css_dir = os.path.join(frontend_dir, "css")
-js_dir = os.path.join(frontend_dir, "js")
-
-if os.path.exists(css_dir):
-    app.mount("/css", StaticFiles(directory=css_dir), name="css")
-if os.path.exists(js_dir):
-    app.mount("/js", StaticFiles(directory=js_dir), name="js")
-
 
 @app.on_event("startup")
 async def startup_event():
     logger.info("Initializing Document Analyzer Backend...")
+    logger.info(f"DATA_DIR: {settings.DATA_DIR}")
+    logger.info(f"OPENROUTER_MODEL: {settings.OPENROUTER_MODEL}")
+    logger.info(f"OPENROUTER_API_KEY configured: {'YES' if settings.OPENROUTER_API_KEY and len(settings.OPENROUTER_API_KEY) > 10 else 'NO'}")
+    # Pre-warm the embedding model on startup
     try:
         embedding_service.get_embeddings()
         logger.info("HuggingFaceEmbeddings ready.")
@@ -72,12 +67,10 @@ async def custom_exception_handler(request: Request, exc: DocumentAnalyzerExcept
 
 @app.get("/")
 async def root():
-    index_path = os.path.join(frontend_dir, "index.html")
-    if os.path.exists(index_path):
-        return FileResponse(index_path)
     return {
         "name": settings.APP_NAME,
         "version": settings.APP_VERSION,
         "docs": "/docs",
+        "health": "/health",
         "status": "running"
     }

@@ -5,14 +5,14 @@ import datetime
 import logging
 from typing import List, Optional, Dict
 from fastapi import UploadFile
-from backend.app.config import settings
-from backend.app.schemas.document import DocumentMetadata
-from backend.app.schemas.chat import ChatMessage
-from backend.app.core.security import validate_file
-from backend.app.core.exceptions import DocumentNotFoundError, DocumentProcessingError
-from backend.app.services.text_extraction import TextExtractor
-from backend.app.rag.chunking import DocumentSplitter
-from backend.app.services.retrieval_service import retrieval_service
+from app.config import settings
+from app.schemas.document import DocumentMetadata
+from app.schemas.chat import ChatMessage
+from app.core.security import validate_file
+from app.core.exceptions import DocumentNotFoundError, DocumentProcessingError
+from app.services.text_extraction import TextExtractor
+from app.rag.chunking import DocumentSplitter
+from app.services.retrieval_service import retrieval_service
 
 logger = logging.getLogger(__name__)
 

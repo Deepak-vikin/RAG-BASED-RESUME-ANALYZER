@@ -1,7 +1,7 @@
 import logging
 from typing import Optional
 from langchain_community.embeddings import HuggingFaceEmbeddings
-from backend.app.config import settings
+from app.config import settings
 
 logger = logging.getLogger(__name__)
 

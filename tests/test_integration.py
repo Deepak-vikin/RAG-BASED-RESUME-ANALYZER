@@ -6,12 +6,15 @@ from starlette.testclient import TestClient
 # Ensure backend is in python path
 current_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.dirname(current_dir)
+backend_dir = os.path.join(project_root, "backend")
+if backend_dir not in sys.path:
+    sys.path.insert(0, backend_dir)
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
-from backend.app.main import app
-from backend.app.services.document_service import document_service
-from backend.app.services.retrieval_service import retrieval_service
+from app.main import app
+from app.services.document_service import document_service
+from app.services.retrieval_service import retrieval_service
 
 
 class TestDocumentAnalyzerBackend(unittest.TestCase):
@@ -63,7 +66,7 @@ class TestDocumentAnalyzerBackend(unittest.TestCase):
         print(f"✓ Vector Retrieval OK: Retrieved {len(chunks)} chunks. Source snippet: {sources[0].content_snippet[:80]}...")
 
         # Test prompt grounding formatting
-        from backend.app.rag.prompts import format_context_from_documents, construct_rag_messages
+        from app.rag.prompts import format_context_from_documents, construct_rag_messages
         context = format_context_from_documents(chunks)
         self.assertIn("Sai Dhinakar", context)
         messages = construct_rag_messages("What is candidate's email?", context)

@@ -14,7 +14,6 @@ ENV/
 .env
 .env.local
 .env.*.local
-*.env
 
 # Runtime Application Data & Vector Storage
 data/
@@ -23,14 +22,26 @@ vectorstores/
 *.faiss
 *.pkl
 
-# Uploaded resumes / test files
+# Uploaded test files
 resumes/
 
-# Deprecated Streamlit cache
+# Legacy Streamlit
 .streamlit/
+legacy/
 
 # OS files
 .DS_Store
 Thumbs.db
 *.swp
 *.bak
+
+# Node modules (if any CDN tools are cached)
+node_modules/
+
+# Vercel local
+.vercel/
+
+# IDE
+.idea/
+.vscode/
+*.code-workspace

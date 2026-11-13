@@ -2,15 +2,15 @@ import logging
 from typing import List, Optional
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import StreamingResponse
-from backend.app.schemas.chat import (
+from app.schemas.chat import (
     ChatRequest,
     ChatResponse,
     ChatHistoryResponse,
     ModelOption
 )
-from backend.app.services.llm_service import llm_service
-from backend.app.services.document_service import document_service
-from backend.app.core.exceptions import DocumentAnalyzerException
+from app.services.llm_service import llm_service
+from app.services.document_service import document_service
+from app.core.exceptions import DocumentAnalyzerException
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/chat", tags=["Chat"])

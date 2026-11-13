@@ -1,11 +1,11 @@
 import json
 import logging
 from typing import List, Optional, AsyncGenerator, Dict, Any
-from backend.app.config import settings
-from backend.app.schemas.chat import ChatMessage, ChatResponse, SourceDocument, ModelOption
-from backend.app.rag.prompts import format_context_from_documents, construct_rag_messages
-from backend.app.services.retrieval_service import retrieval_service
-from backend.app.services.openrouter_client import openrouter_client
+from app.config import settings
+from app.schemas.chat import ChatMessage, ChatResponse, SourceDocument, ModelOption
+from app.rag.prompts import format_context_from_documents, construct_rag_messages
+from app.services.retrieval_service import retrieval_service
+from app.services.openrouter_client import openrouter_client
 
 logger = logging.getLogger(__name__)
 

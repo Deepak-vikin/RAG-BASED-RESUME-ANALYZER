@@ -2,7 +2,7 @@ import os
 from typing import List
 from langchain_core.documents import Document
 from langchain_community.document_loaders import PyPDFLoader
-from backend.app.core.exceptions import DocumentProcessingError
+from app.core.exceptions import DocumentProcessingError
 
 
 class TextExtractor:

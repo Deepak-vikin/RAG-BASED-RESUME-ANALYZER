@@ -1,7 +1,7 @@
 from typing import List
 from langchain_core.documents import Document
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from backend.app.config import settings
+from app.config import settings
 
 
 class DocumentSplitter:

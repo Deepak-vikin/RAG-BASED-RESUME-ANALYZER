@@ -1,6 +1,6 @@
 from fastapi import APIRouter
-from backend.app.config import settings
-from backend.app.services.document_service import document_service
+from app.config import settings
+from app.services.document_service import document_service
 
 router = APIRouter(tags=["Health"])
 

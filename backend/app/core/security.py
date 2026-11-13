@@ -1,8 +1,8 @@
 import re
 import os
 from typing import Tuple
-from backend.app.config import settings
-from backend.app.core.exceptions import InvalidFileTypeError, FileSizeExceededError
+from app.config import settings
+from app.core.exceptions import InvalidFileTypeError, FileSizeExceededError
 
 
 def sanitize_filename(filename: str) -> str:
